@@ -68,11 +68,6 @@ export default new class Core {
             Builtins[module].initialize();
         }
 
-        if (isRecoveryMode()) {
-            Logger.log("Startup", "Detected Recovery Mode");
-            return showRecoveryNotice();
-        }
-
         Logger.log("Startup", "Loading Plugins");
         // const pluginErrors = [];
         const pluginErrors = PluginManager.initialize();
@@ -90,6 +85,8 @@ export default new class Core {
             Modals.showChangelogModal(Changelog);
             DataStore.setBDData("version", Config.version);
         }
+
+        if (isRecoveryMode()) showRecoveryNotice();
     }
 
     waitForGuilds() {

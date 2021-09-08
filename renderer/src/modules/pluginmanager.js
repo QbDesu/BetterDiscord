@@ -9,6 +9,7 @@ import Events from "./emitter";
 import Toasts from "../ui/toasts";
 import Modals from "../ui/modals";
 import SettingsRenderer from "../ui/settings";
+import { isRecoveryMode } from "./recoverymode";
 
 const path = require("path");
 const vm = require("vm");
@@ -109,7 +110,7 @@ export default new class PluginManager extends AddonManager {
         container.innerHTML = final;
         container.id = `${meta.id}-script-container`;
         // container.src = `data:text/javascript;${btoa(final)}`;
-        document.head.append(container);
+        if (!isRecoveryMode()) document.head.append(container);
 
         meta.exports = module.exports;
         module.exports = meta;
@@ -125,6 +126,7 @@ export default new class PluginManager extends AddonManager {
     getAddon(id) {return this.getPlugin(id);}
 
     startPlugin(idOrAddon) {
+        if (isRecoveryMode()) return;
         const addon = typeof(idOrAddon) == "string" ? this.addonList.find(p => p.id == idOrAddon) : idOrAddon;
         if (!addon) return;
         const plugin = addon.instance;
@@ -142,6 +144,7 @@ export default new class PluginManager extends AddonManager {
     }
 
     stopPlugin(idOrAddon) {
+        if (isRecoveryMode()) return;
         const addon = typeof(idOrAddon) == "string" ? this.addonList.find(p => p.id == idOrAddon) : idOrAddon;
         if (!addon) return;
         const plugin = addon.instance;
@@ -165,6 +168,7 @@ export default new class PluginManager extends AddonManager {
     }
 
     setupFunctions() {
+        if (isRecoveryMode()) return;
         // electronRemote.getCurrentWebContents().on("did-navigate-in-page", this.onSwitch.bind(this));
         Events.on("navigate", this.onSwitch);
         // ipc.on(IPCEvents.NAVIGATE, this.onSwitch);

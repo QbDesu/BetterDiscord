@@ -10,6 +10,7 @@ import DiscordModules from "./discordmodules";
 import Strings from "./strings";
 import AddonEditor from "../ui/misc/addoneditor";
 import FloatingWindows from "../ui/floatingwindows";
+import { isRecoveryMode } from "./recoverymode";
 
 const React = DiscordModules.React;
 
@@ -216,15 +217,19 @@ export default class AddonManager {
         const addon = __non_webpack_require__(path.resolve(this.addonFolder, filename));
         if (this.addonList.find(c => c.id == addon.id)) return new AddonError(addon.name, filename, Strings.Addons.alreadyExists.format({type: this.prefix, name: addon.name}), this.prefix);
 
-        const error = this.initializeAddon(addon);
-        if (error) return error;
+        if (!isRecoveryMode()) {
+            const error = this.initializeAddon(addon);
+            if (error) return error;
+        }
 
         this.addonList.push(addon);
         if (shouldToast) Toasts.success(`${addon.name} v${addon.version} was loaded.`);
         this.emit("loaded", addon.id);
         
-        if (!this.state[addon.id]) return this.state[addon.id] = false;
-        return this.startAddon(addon);
+        if (!isRecoveryMode()) {
+            if (!this.state[addon.id]) return this.state[addon.id] = false;
+            return this.startAddon(addon);
+        }
     }
 
     unloadAddon(idOrFileOrAddon, shouldToast = true, isReload = false) {
